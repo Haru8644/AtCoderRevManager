@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AtCoderRevManager.ServiceDefaults\AtCoderRevManager.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\AtCoderRevManager.Infrastructure\AtCoderRevManager.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
