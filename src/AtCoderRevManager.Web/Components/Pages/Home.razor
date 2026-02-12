@@ -1,7 +1,145 @@
 ﻿@page "/"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using AtCoderRevManager.Web.Models
+@using AtCoderRevManager.Web.Services
+@inject ReviewApiClient ReviewApi
+@inject IDialogService DialogService
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard | AtCoderRevManager</PageTitle>
 
-<h1>Hello, world!</h1>
+<FluentStack VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 20px;">
+    <FluentLabel Typo="Typography.H3">Review Dashboard</FluentLabel>
+    <FluentSpacer />
+    <FluentButton Appearance="Appearance.Accent" IconStart="@_addIcon" OnClick="@OpenCreateDialogAsync">
+        New Review
+    </FluentButton>
+</FluentStack>
 
-Welcome to your new app.
+@if (_reviews == null)
+{
+    <FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" Style="height: 50vh;">
+        <FluentProgressRing />
+        <FluentLabel>Loading your learning path...</FluentLabel>
+    </FluentStack>
+}
+else if (_reviews.Count == 0)
+{
+    <FluentMessageBar Intent="MessageIntent.Info">
+        No reviews found. Start your first review cycle by clicking "New Review".
+    </FluentMessageBar>
+}
+else
+{
+    <FluentDataGrid Items="@_reviews.AsQueryable()" ResizableColumns="true" Pagination="@_pagination">
+        <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
+        <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
+
+        <TemplateColumn Title="Difficulty">
+            <FluentBadge BackgroundColor="@GetDifficultyColor(context.Difficulty)" Color="white">@context.Difficulty</FluentBadge>
+        </TemplateColumn>
+
+        <TemplateColumn Title="Status">
+            @if (context.IsSolved)
+            {
+                <FluentIcon Value="@_checkIcon" Color="Color.Success" />
+            }
+            else
+            {
+                <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
+            }
+        </TemplateColumn>
+
+        <PropertyColumn Property="@(r => r.ContestName)" Title="Contest" />
+        <PropertyColumn Property="@(r => r.CreatedAt)" Title="Created" Format="yyyy-MM-dd" Sortable="true" />
+
+        <TemplateColumn Title="Actions">
+            <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(context))" />
+        </TemplateColumn>
+    </FluentDataGrid>
+
+    <FluentPaginator State="@_pagination" />
+}
+
+@code {
+    private const string UserId = "haru";
+    private List<ReviewModel>? _reviews;
+    private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
+    private Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
+    private Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle(); 
+    private Icon _circleIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Circle();
+    private Icon _deleteIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Delete();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            _reviews = await ReviewApi.GetReviewsAsync(UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            _reviews = [];
+        }
+    }
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var initialData = new CreateReviewRequest
+        {
+            ProblemId = string.Empty,
+            Title = string.Empty,
+            ContestName = string.Empty,
+            Difficulty = 0
+        };
+
+        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewDialog>(initialData, new DialogParameters()
+        {
+            Title = "Register Review",
+            PreventDismissOnOverlayClick = true,
+            Width = "500px"
+        });
+
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data is CreateReviewRequest request)
+        {
+            await ReviewApi.CreateReviewAsync(UserId, request);
+            await LoadDataAsync();
+        }
+    }
+
+    private async Task DeleteReviewAsync(ReviewModel review)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(
+            $"Delete review for {review.ProblemId}?",
+            "Delete",
+            "Cancel",
+            "Deletion Confirmation"
+        );
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await ReviewApi.DeleteReviewAsync(UserId, review.Id);
+            await LoadDataAsync();
+        }
+    }
+
+    private string GetDifficultyColor(int difficulty)
+    {
+        if (difficulty < 400) return "#808080";
+        if (difficulty < 800) return "#804000";
+        if (difficulty < 1200) return "#008000";
+        if (difficulty < 1600) return "#00C0C0";
+        if (difficulty < 2000) return "#0000FF";
+        if (difficulty < 2400) return "#C0C000";
+        if (difficulty < 2800) return "#FF8000";
+        return "#FF0000";
+    }
+}

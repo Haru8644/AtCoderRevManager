@@ -1,0 +1,80 @@
+﻿@using AtCoderRevManager.Web.Models
+@using System.ComponentModel.DataAnnotations
+@implements IDialogContentComponent<CreateReviewRequest>
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@_headerIcon" />
+        <FluentLabel Typo="Typography.PaneHeader">New Review</FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+        <FluentTextField @bind-Value="@_formModel.ProblemId" Label="Problem ID" Placeholder="e.g. abc300_a" Required="true" Autofocus="true" />
+        <FluentTextField @bind-Value="@_formModel.Title" Label="Title" Placeholder="Problem Title" Required="true" />
+        <FluentTextField @bind-Value="@_formModel.ContestName" Label="Contest Name" Placeholder="e.g. ABC 300" />
+        <FluentNumberField @bind-Value="@_formModel.Difficulty" Label="Difficulty" Min="0" Max="5000" />
+    </FluentStack>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync">Save</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public CreateReviewRequest Content { get; set; } = default!;
+
+    private ReviewFormModel _formModel = new();
+    private Icon _headerIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.AddCircle();
+
+    protected override void OnInitialized()
+    {
+        if (Content != null)
+        {
+            _formModel = new ReviewFormModel
+            {
+                ProblemId = Content.ProblemId,
+                Title = Content.Title,
+                ContestName = Content.ContestName,
+                Difficulty = Content.Difficulty
+            };
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_formModel.ProblemId) || string.IsNullOrWhiteSpace(_formModel.Title))
+        {
+            return;
+        }
+
+        var request = new CreateReviewRequest
+        {
+            ProblemId = _formModel.ProblemId,
+            Title = _formModel.Title,
+            ContestName = _formModel.ContestName,
+            Difficulty = _formModel.Difficulty
+        };
+
+        await Dialog.CloseAsync(request);
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    private class ReviewFormModel
+    {
+        public string ProblemId { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string ContestName { get; set; } = "";
+        public int Difficulty { get; set; }
+    }
+}
