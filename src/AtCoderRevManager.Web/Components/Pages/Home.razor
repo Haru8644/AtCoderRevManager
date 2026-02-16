@@ -4,13 +4,13 @@
 @using AtCoderRevManager.Web.Services
 @inject ReviewApiClient ReviewApi
 @inject IDialogService DialogService
-@inject IToastService ToastService 
-@inject ILogger<Home> Logger
+@inject IToastService ToastService
+@inject ILogger<Home> Logger 
 @rendermode InteractiveServer
 
 <PageTitle>Dashboard | AtCoderRevManager</PageTitle>
 
-<FluentStack VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 20px;">
+<FluentStack VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 24px;">
     <FluentLabel Typo="Typography.H3">Review Dashboard</FluentLabel>
     <FluentSpacer />
     <FluentButton Appearance="Appearance.Accent" IconStart="@_addIcon" OnClick="@OpenCreateDialogAsync">
@@ -25,60 +25,129 @@
         <FluentLabel>Loading your learning path...</FluentLabel>
     </FluentStack>
 }
-else if (_reviews.Count == 0)
-{
-    <FluentMessageBar Intent="MessageIntent.Info">
-        No reviews found. Start your first review cycle by clicking "New Review".
-    </FluentMessageBar>
-}
 else
 {
-    <FluentDataGrid Items="@_reviews.AsQueryable()" ResizableColumns="true" Pagination="@_pagination">
-        <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
-        <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
+    <FluentGrid Spacing="3" Style="margin-bottom: 24px;">
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Total Reviews</FluentLabel>
+                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
+                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold">@TotalCount</FluentLabel>
+                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">problems</FluentLabel>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
 
-        <TemplateColumn Title="Difficulty" Context="review">
-            <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">
-                @review.Difficulty
-            </FluentBadge>
-        </TemplateColumn>
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Solved</FluentLabel>
+                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
+                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold" Color="Color.Success">@SolvedCount</FluentLabel>
+                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">problems</FluentLabel>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
 
-        <TemplateColumn Title="Status" Context="review">
-            @if (review.IsSolved)
-            {
-                <FluentIcon Value="@_checkIcon" Color="Color.Success" />
-            }
-            else
-            {
-                <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
-            }
-        </TemplateColumn>
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Completion Rate</FluentLabel>
+                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
+                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold" Color="Color.Info">@CompletionRate</FluentLabel>
+                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">%</FluentLabel>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
+    </FluentGrid>
 
-        <PropertyColumn Property="@(r => r.ContestName)" Title="Contest" />
-        <PropertyColumn Property="@(r => r.CreatedAt)" Title="Created" Format="yyyy-MM-dd" Sortable="true" />
+    @if (_reviews.Count == 0)
+    {
+        <FluentMessageBar Intent="MessageIntent.Info">
+            No reviews found. Start your first review cycle by clicking "New Review".
+        </FluentMessageBar>
+    }
+    else
+    {
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="16" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 16px;">
+            <FluentSearch @bind-Value="_searchTerm" 
+                          @bind-Value:after="ResetPagination"
+                          Placeholder="Search by ID or Title..." 
+                          Style="width: 300px;" />
+            <FluentSelect TOption="string" @bind-Value="_statusFilter" @bind-Value:after="ResetPagination">
+                <FluentOption Value="All">All Status</FluentOption>
+                <FluentOption Value="Solved">Solved</FluentOption>
+                <FluentOption Value="Unsolved">Unsolved</FluentOption>
+            </FluentSelect>
+        </FluentStack>
 
-        <TemplateColumn Title="Actions" Context="review">
-            <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="2">
-                <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => UpdateProgressAsync(review))" />
+        <FluentDataGrid Items="@FilteredReviews" ResizableColumns="true" Pagination="@_pagination" Style="background-color: white; border-radius: 8px; padding: 8px;">
+            <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
+            <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
+
+            <TemplateColumn Title="Difficulty" Context="review">
+                <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">@review.Difficulty</FluentBadge>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Status" Context="review">
+                @if (review.IsSolved)
+                {
+                    <FluentIcon Value="@_checkIcon" Color="Color.Success" />
+                }
+                else
+                {
+                    <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
+                }
+            </TemplateColumn>
+
+            <PropertyColumn Property="@(r => r.ContestName)" Title="Contest" />
+            <PropertyColumn Property="@(r => r.CreatedAt)" Title="Created" Format="yyyy-MM-dd" Sortable="true" />
+
+            <TemplateColumn Title="Actions" Context="review">
+                <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => OpenEditDialogAsync(review))" />
                 <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
-            </FluentStack>
-        </TemplateColumn>
-    </FluentDataGrid>
+            </TemplateColumn>
+        </FluentDataGrid>
 
-    <FluentPaginator State="@_pagination" />
+        <FluentPaginator State="@_pagination" />
+    }
 }
 
 @code {
     private const string UserId = "haru";
-
     private List<ReviewModel>? _reviews;
     private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
-
+    private string _searchTerm = string.Empty;
+    private string _statusFilter = "All";
+    
     private readonly Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
-    private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle();
+    private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle(); 
     private readonly Icon _circleIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Circle();
     private readonly Icon _deleteIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Delete();
     private readonly Icon _editIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Edit();
+    
+    private int TotalCount => _reviews?.Count ?? 0;
+    private int SolvedCount => _reviews?.Count(r => r.IsSolved) ?? 0;
+    private string CompletionRate => TotalCount == 0 ? "0.0" : ((double)SolvedCount / TotalCount * 100).ToString("F1");
+
+    private IQueryable<ReviewModel>? FilteredReviews
+    {
+        get
+        {
+            if (_reviews == null) return null;
+
+            var query = _reviews.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                query = query.Where(r => r.ProblemId.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                         r.Title.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (_statusFilter == "Solved") query = query.Where(r => r.IsSolved);
+            else if (_statusFilter == "Unsolved") query = query.Where(r => !r.IsSolved);
+
+            return query.AsQueryable();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,9 +162,9 @@ else
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to fetch reviews for user {UserId}", UserId);
+            Logger.LogError(ex, "Failed to load data for user {UserId}", UserId);
+            ToastService.ShowError("Failed to fetch data from the server.");
             _reviews = [];
-            ToastService.ShowError("Failed to load data from the server.");
         }
     }
 
@@ -123,18 +192,18 @@ else
             try
             {
                 await ReviewApi.CreateReviewAsync(UserId, request);
-                ToastService.ShowSuccess("Review created successfully.");
                 await LoadDataAsync();
+                ToastService.ShowSuccess("Review registered successfully!");
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to create review.");
-                ToastService.ShowError("Could not create review. Please try again.");
+                Logger.LogError(ex, "Error creating review.");
+                ToastService.ShowError("Could not register the review.");
             }
         }
     }
 
-    private async Task UpdateProgressAsync(ReviewModel review)
+    private async Task OpenEditDialogAsync(ReviewModel review)
     {
         var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewProgressDialog>(review, new DialogParameters()
         {
@@ -144,17 +213,18 @@ else
         });
 
         var result = await dialog.Result;
+        
         if (!result.Cancelled && result.Data is UpdateProgressRequest request)
         {
             try
             {
                 await ReviewApi.UpdateProgressAsync(UserId, review.Id, request.IsSolved, request.Notes);
-                ToastService.ShowSuccess("Progress updated.");
                 await LoadDataAsync();
+                ToastService.ShowSuccess("Progress updated successfully!");
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to update progress for review {Id}", review.Id);
+                Logger.LogError(ex, "Error updating progress for ID: {Id}", review.Id);
                 ToastService.ShowError("Could not update progress.");
             }
         }
@@ -175,15 +245,20 @@ else
             try
             {
                 await ReviewApi.DeleteReviewAsync(UserId, review.Id);
-                ToastService.ShowSuccess("Review deleted.");
                 await LoadDataAsync();
+                ToastService.ShowInfo("Review deleted.");
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to delete review {Id}", review.Id);
+                Logger.LogError(ex, "Error deleting review ID: {Id}", review.Id);
                 ToastService.ShowError("Could not delete the review.");
             }
         }
+    }
+
+    private async Task ResetPagination()
+    {
+        await _pagination.SetCurrentPageIndexAsync(0);
     }
 
     private string GetDifficultyColor(int difficulty)
