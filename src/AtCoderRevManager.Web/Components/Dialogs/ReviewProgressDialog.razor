@@ -1,0 +1,61 @@
+﻿@using AtCoderRevManager.Web.Models
+@implements IDialogContentComponent<ReviewModel>
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@_headerIcon" />
+        <FluentLabel Typo="Typography.PaneHeader">Update Progress: @Content.ProblemId</FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+        <FluentSwitch @bind-Value="@_formModel.IsSolved" Label="Mark as Solved" />
+        <FluentTextArea @bind-Value="@_formModel.Notes" Label="Retrospective / Notes" Placeholder="e.g. DPの状態遷移を間違えた。次は制約から計算量を逆算する。" Rows="5" Style="width: 100%;" />
+    </FluentStack>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync">Update</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public ReviewModel Content { get; set; } = default!;
+
+    private ProgressFormModel _formModel = new();
+    private Icon _headerIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Edit();
+
+    protected override void OnInitialized()
+    {
+        if (Content != null)
+        {
+            _formModel = new ProgressFormModel
+            {
+                IsSolved = Content.IsSolved,
+                Notes = Content.Notes ?? string.Empty 
+            };
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        var request = new UpdateProgressRequest(_formModel.IsSolved, _formModel.Notes);
+        await Dialog.CloseAsync(request);
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    private class ProgressFormModel
+    {
+        public bool IsSolved { get; set; }
+        public string Notes { get; set; } = "";
+    }
+}

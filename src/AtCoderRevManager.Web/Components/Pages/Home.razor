@@ -4,6 +4,8 @@
 @using AtCoderRevManager.Web.Services
 @inject ReviewApiClient ReviewApi
 @inject IDialogService DialogService
+@inject IToastService ToastService 
+@inject ILogger<Home> Logger
 @rendermode InteractiveServer
 
 <PageTitle>Dashboard | AtCoderRevManager</PageTitle>
@@ -35,12 +37,14 @@ else
         <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
         <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
 
-        <TemplateColumn Title="Difficulty">
-            <FluentBadge BackgroundColor="@GetDifficultyColor(context.Difficulty)" Color="white">@context.Difficulty</FluentBadge>
+        <TemplateColumn Title="Difficulty" Context="review">
+            <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">
+                @review.Difficulty
+            </FluentBadge>
         </TemplateColumn>
 
-        <TemplateColumn Title="Status">
-            @if (context.IsSolved)
+        <TemplateColumn Title="Status" Context="review">
+            @if (review.IsSolved)
             {
                 <FluentIcon Value="@_checkIcon" Color="Color.Success" />
             }
@@ -53,8 +57,11 @@ else
         <PropertyColumn Property="@(r => r.ContestName)" Title="Contest" />
         <PropertyColumn Property="@(r => r.CreatedAt)" Title="Created" Format="yyyy-MM-dd" Sortable="true" />
 
-        <TemplateColumn Title="Actions">
-            <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(context))" />
+        <TemplateColumn Title="Actions" Context="review">
+            <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="2">
+                <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => UpdateProgressAsync(review))" />
+                <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
+            </FluentStack>
         </TemplateColumn>
     </FluentDataGrid>
 
@@ -63,12 +70,15 @@ else
 
 @code {
     private const string UserId = "haru";
+
     private List<ReviewModel>? _reviews;
     private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
-    private Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
-    private Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle(); 
-    private Icon _circleIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Circle();
-    private Icon _deleteIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Delete();
+
+    private readonly Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
+    private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle();
+    private readonly Icon _circleIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Circle();
+    private readonly Icon _deleteIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Delete();
+    private readonly Icon _editIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Edit();
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,8 +93,9 @@ else
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading data: {ex.Message}");
+            Logger.LogError(ex, "Failed to fetch reviews for user {UserId}", UserId);
             _reviews = [];
+            ToastService.ShowError("Failed to load data from the server.");
         }
     }
 
@@ -109,8 +120,43 @@ else
 
         if (!result.Cancelled && result.Data is CreateReviewRequest request)
         {
-            await ReviewApi.CreateReviewAsync(UserId, request);
-            await LoadDataAsync();
+            try
+            {
+                await ReviewApi.CreateReviewAsync(UserId, request);
+                ToastService.ShowSuccess("Review created successfully.");
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to create review.");
+                ToastService.ShowError("Could not create review. Please try again.");
+            }
+        }
+    }
+
+    private async Task UpdateProgressAsync(ReviewModel review)
+    {
+        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewProgressDialog>(review, new DialogParameters()
+        {
+            Title = "Update Progress",
+            PreventDismissOnOverlayClick = true,
+            Width = "500px"
+        });
+
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data is UpdateProgressRequest request)
+        {
+            try
+            {
+                await ReviewApi.UpdateProgressAsync(UserId, review.Id, request.IsSolved, request.Notes);
+                ToastService.ShowSuccess("Progress updated.");
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to update progress for review {Id}", review.Id);
+                ToastService.ShowError("Could not update progress.");
+            }
         }
     }
 
@@ -126,8 +172,17 @@ else
         var result = await dialog.Result;
         if (!result.Cancelled)
         {
-            await ReviewApi.DeleteReviewAsync(UserId, review.Id);
-            await LoadDataAsync();
+            try
+            {
+                await ReviewApi.DeleteReviewAsync(UserId, review.Id);
+                ToastService.ShowSuccess("Review deleted.");
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to delete review {Id}", review.Id);
+                ToastService.ShowError("Could not delete the review.");
+            }
         }
     }
 
