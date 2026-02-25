@@ -1,0 +1,395 @@
+﻿.glass {
+    border: 1px solid var(--border-1);
+    background: linear-gradient(180deg, var(--surface-0), rgba(255, 255, 255, 0.04));
+    border-radius: var(--r-lg);
+    backdrop-filter: blur(12px);
+}
+
+.panel {
+    padding: var(--s-5);
+}
+
+.section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.section-title__hint {
+    color: var(--text-3);
+    font-size: 1.02rem;
+}
+
+.cyber-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.cyber-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(560px 220px at 18% 10%, rgba(53, 184, 255, 0.10), transparent 55%), radial-gradient(560px 220px at 82% 0%, rgba(178, 91, 255, 0.08), transparent 55%);
+    pointer-events: none;
+}
+
+.cyber-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(53, 184, 255, 0.40);
+    box-shadow: var(--shadow-1), 0 0 26px rgba(53, 184, 255, 0.14);
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 22px rgba(53, 184, 255, 0.14);
+}
+
+.hero-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 26px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.hero-button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 0 20px rgba(53, 184, 255, 0.55);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--s-4);
+}
+
+.kpi {
+    grid-column: span 3;
+    padding: 18px 20px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border-2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+    box-shadow: var(--shadow-1);
+    min-height: 104px;
+}
+
+@media (max-width: 1100px) {
+    .kpi {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 700px) {
+    .kpi {
+        grid-column: span 12;
+    }
+}
+
+.kpi__label {
+    color: var(--text-2);
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kpi__valueRow {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.kpi__value {
+    font-size: 3.2rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.kpi--danger {
+    border-left: 4px solid var(--danger);
+}
+
+.kpi--accent {
+    border-left: 4px solid var(--accent);
+}
+
+.kpi--success {
+    border-left: 4px solid var(--success);
+}
+
+.kpi--warning {
+    border-left: 4px solid var(--warning);
+}
+
+.data-surface {
+    margin-top: var(--s-4);
+    padding: var(--s-4);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.26);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-1);
+}
+
+.muted {
+    color: var(--text-3);
+}
+
+.due {
+    color: var(--danger);
+    font-weight: 750;
+}
+
+fluent-text-field::part(control),
+fluent-search::part(control),
+fluent-select::part(control) {
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--text-1);
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+}
+
+fluent-text-field::part(control):focus-within,
+fluent-search::part(control):focus-within,
+fluent-select::part(control):focus-within {
+    border-color: rgba(53, 184, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(53, 184, 255, 0.18);
+}
+
+fluent-text-field::part(input)::placeholder,
+fluent-search::part(input)::placeholder {
+    color: var(--text-3);
+}
+
+fluent-switch::part(label) {
+    color: var(--text-2);
+}
+
+fluent-data-grid::part(base) {
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text-1);
+    border-radius: var(--r-lg);
+}
+
+fluent-data-grid-row {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+    fluent-data-grid-row:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+fluent-data-grid-cell[role="columnheader"] {
+    color: var(--text-2);
+    font-weight: 650;
+}
+
+fluent-paginator {
+    color: var(--text-2);
+}
+
+.page-lead {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: var(--s-4);
+}
+
+.page-lead__subtitle {
+    color: var(--text-3);
+    max-width: 64ch;
+}
+
+.sweep {
+    position: relative;
+    overflow: hidden;
+}
+
+.sweep::after {
+    content: "";
+    position: absolute;
+    inset: -40% -120%;
+    background: linear-gradient( 90deg, transparent 0%, rgba(53, 184, 255, 0.00) 30%, rgba(53, 184, 255, 0.22) 45%, rgba(178, 91, 255, 0.18) 55%, rgba(53, 184, 255, 0.00) 70%, transparent 100% );
+    transform: translateX(-30%) skewX(-18deg);
+    animation: sweepX 5.5s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+@keyframes sweepX {
+    0% {
+        transform: translateX(-30%) skewX(-18deg);
+        opacity: 0.0;
+    }
+
+    12% {
+        opacity: 1.0;
+    }
+
+    45% {
+        transform: translateX(30%) skewX(-18deg);
+        opacity: 1.0;
+    }
+
+    60% {
+        opacity: 0.0;
+    }
+
+    100% {
+        transform: translateX(30%) skewX(-18deg);
+        opacity: 0.0;
+    }
+}
+
+.pop {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.pop:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-1), 0 0 26px rgba(53, 184, 255, 0.14);
+}
+
+.fade-up {
+    animation: fadeUp 420ms ease-out both;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+:root {
+    --motion-fast: 140ms;
+    --motion-base: 220ms;
+    --motion-slow: 420ms;
+    --ease-out: cubic-bezier(.2, .8, .2, 1);
+    --ease-spring: cubic-bezier(.2, 1.2, .2, 1);
+}
+
+.tap {
+    transform: translateZ(0);
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+}
+
+.tap:active {
+    transform: scale(0.985);
+}
+
+.fade-up {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp var(--motion-slow) var(--ease-out) forwards;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::before {
+    content: "";
+    position: absolute;
+    inset: -60% -80%;
+    background: linear-gradient( 90deg, transparent 0%, rgba(255, 255, 255, 0.00) 35%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.00) 65%, transparent 100% );
+    transform: translateX(-20%) rotate(10deg);
+    animation: shimmerMove 4.8s var(--ease-out) infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.9;
+}
+
+@keyframes shimmerMove {
+    0% {
+        transform: translateX(-25%) rotate(10deg);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 0.9;
+    }
+
+    45% {
+        transform: translateX(25%) rotate(10deg);
+        opacity: 0.9;
+    }
+
+    60% {
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(25%) rotate(10deg);
+        opacity: 0;
+    }
+}
+
+.pulse {
+    animation: glowPulse 3.6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: var(--shadow-1), 0 0 18px rgba(53, 184, 255, 0.10);
+    }
+
+    50% {
+        box-shadow: var(--shadow-1), 0 0 26px rgba(53, 184, 255, 0.18);
+    }
+}
+
+.pop {
+    transition: transform var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out), border-color var(--motion-base) var(--ease-out);
+}
+
+.pop:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-1), 0 0 26px rgba(53, 184, 255, 0.14);
+}
+
+.focus-ring :is(fluent-text-field, fluent-search, fluent-select)::part(control):focus-within {
+    border-color: rgba(53, 184, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(53, 184, 255, 0.18);
+}
+
+:root {
+    --input-radius: 14px;
+}
+
+fluent-text-field::part(control),
+fluent-search::part(control),
+fluent-select::part(control) {
+    border-radius: var(--input-radius);
+}

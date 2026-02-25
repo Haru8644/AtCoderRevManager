@@ -1,0 +1,22 @@
+﻿.u-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+}
+
+.u-spacer {
+    flex: 1;
+}
+
+.u-mb-4 {
+    margin-bottom: var(--s-4);
+}
+
+.u-mb-5 {
+    margin-bottom: var(--s-5);
+}
+
+.u-w-320 {
+    width: 320px;
+    max-width: 100%;
+}

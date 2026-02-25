@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace AtCoderRevManager.Web.Models;
 
@@ -12,8 +13,13 @@ public record ReviewModel(
     int Difficulty,
     bool IsSolved,
     string Notes,
-    DateTime CreatedAt
-);
+    DateTime CreatedAt,
+    int ReviewCount,    
+    DateTime NextReviewDate
+)
+{
+    public bool IsDue => NextReviewDate <= DateTime.UtcNow;
+}
 
 // Request DTO: Uses 'required' to enforce initialization at compile time.
 public record CreateReviewRequest
@@ -29,5 +35,4 @@ public record CreateReviewRequest
     [Range(0, 5000)]
     public int Difficulty { get; init; }
 }
-
 public record UpdateProgressRequest(bool IsSolved, string Notes);

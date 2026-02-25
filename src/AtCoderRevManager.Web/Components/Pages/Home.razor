@@ -5,154 +5,209 @@
 @inject ReviewApiClient ReviewApi
 @inject IDialogService DialogService
 @inject IToastService ToastService
-@inject ILogger<Home> Logger 
+@inject ILogger<Home> Logger
 @rendermode InteractiveServer
 
 <PageTitle>Dashboard | AtCoderRevManager</PageTitle>
 
-<FluentStack VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 24px;">
-    <FluentLabel Typo="Typography.H3">Review Dashboard</FluentLabel>
-    <FluentSpacer />
+<div class="u-row u-mb-5 fade-up">
+    <div class="section-title">
+        <FluentLabel Typo="Typography.H3" Class="gradient-text">Review Dashboard</FluentLabel>
+        <span class="section-title__hint">Spaced repetition, operationalized.</span>
+    </div>
+
+    <div class="u-spacer"></div>
+
     <FluentButton Appearance="Appearance.Accent" IconStart="@_addIcon" OnClick="@OpenCreateDialogAsync">
         New Review
     </FluentButton>
-</FluentStack>
+</div>
 
 @if (_reviews == null)
 {
-    <FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" Style="height: 50vh;">
-        <FluentProgressRing />
-        <FluentLabel>Loading your learning path...</FluentLabel>
-    </FluentStack>
+    <div class="glass panel cyber-card sweep shimmer tap" data-glow="accent">
+        <FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+                     VerticalAlignment="VerticalAlignment.Center"
+                     Class="loadingArea">
+            <FluentProgressRing />
+            <FluentLabel Class="muted">Loading your learning path…</FluentLabel>
+        </FluentStack>
+    </div>
 }
 else
 {
-    <FluentGrid Spacing="3" Style="margin-bottom: 24px;">
-        <FluentGridItem xs="12" sm="4">
-            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Total Reviews</FluentLabel>
-                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
-                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold">@TotalCount</FluentLabel>
-                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">problems</FluentLabel>
-                </FluentStack>
-            </FluentCard>
-        </FluentGridItem>
+    <div class="kpi-grid u-mb-5 fade-up">
+        <div class="kpi cyber-card sweep shimmer pop tap kpi--danger" data-glow="accent">
+            <div class="kpi__label">🔥 Due Today</div>
+            <div class="kpi__valueRow">
+                <div class="kpi__value">@DueCount</div>
+                <div class="muted">tasks</div>
+            </div>
+        </div>
 
-        <FluentGridItem xs="12" sm="4">
-            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Solved</FluentLabel>
-                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
-                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold" Color="Color.Success">@SolvedCount</FluentLabel>
-                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">problems</FluentLabel>
-                </FluentStack>
-            </FluentCard>
-        </FluentGridItem>
+        <div class="kpi cyber-card sweep shimmer pop tap kpi--accent">
+            <div class="kpi__label">Total Reviews</div>
+            <div class="kpi__valueRow">
+                <div class="kpi__value">@TotalCount</div>
+            </div>
+        </div>
 
-        <FluentGridItem xs="12" sm="4">
-            <FluentCard Style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">Completion Rate</FluentLabel>
-                <FluentStack VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
-                    <FluentLabel Typo="Typography.H1" Weight="FontWeight.Bold" Color="Color.Info">@CompletionRate</FluentLabel>
-                    <FluentLabel Typo="Typography.Body" Style="margin-bottom: 6px;">%</FluentLabel>
-                </FluentStack>
-            </FluentCard>
-        </FluentGridItem>
-    </FluentGrid>
+        <div class="kpi cyber-card sweep shimmer pop tap kpi--success">
+            <div class="kpi__label">Solved</div>
+            <div class="kpi__valueRow">
+                <div class="kpi__value">@SolvedCount</div>
+            </div>
+        </div>
+
+        <div class="kpi cyber-card sweep shimmer pop tap kpi--warning">
+            <div class="kpi__label">Completion Rate</div>
+            <div class="kpi__valueRow">
+                <div class="kpi__value">@CompletionRate</div>
+                <div class="muted">%</div>
+            </div>
+        </div>
+    </div>
 
     @if (_reviews.Count == 0)
     {
         <FluentMessageBar Intent="MessageIntent.Info">
-            No reviews found. Start your first review cycle by clicking "New Review".
+            No reviews found. Start your first review cycle by clicking “New Review”.
         </FluentMessageBar>
     }
     else
     {
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="16" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 16px;">
-            <FluentSearch @bind-Value="_searchTerm" 
-                          @bind-Value:after="ResetPagination"
-                          Placeholder="Search by ID or Title..." 
-                          Style="width: 300px;" />
-            <FluentSelect TOption="string" @bind-Value="_statusFilter" @bind-Value:after="ResetPagination">
-                <FluentOption Value="All">All Status</FluentOption>
-                <FluentOption Value="Solved">Solved</FluentOption>
-                <FluentOption Value="Unsolved">Unsolved</FluentOption>
-            </FluentSelect>
-        </FluentStack>
+        <div class="glass panel u-mb-4 cyber-card sweep shimmer tap fade-up">
+            <div class="u-row focus-ring">
+                <FluentSearch class="u-w-320"
+                              @bind-Value="_searchTerm"
+                              @bind-Value:after="ResetPagination"
+                              Placeholder="Search by ID or Title…" />
 
-        <FluentDataGrid Items="@FilteredReviews" ResizableColumns="true" Pagination="@_pagination" Style="background-color: white; border-radius: 8px; padding: 8px;">
-            <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
-            <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
+                <FluentSelect TOption="string" @bind-Value="_statusFilter" @bind-Value:after="ResetPagination">
+                    <FluentOption Value="All">All Status</FluentOption>
+                    <FluentOption Value="Solved">Solved</FluentOption>
+                    <FluentOption Value="Unsolved">Unsolved</FluentOption>
+                </FluentSelect>
 
-            <TemplateColumn Title="Difficulty" Context="review">
-                <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">@review.Difficulty</FluentBadge>
-            </TemplateColumn>
+                <FluentSwitch @bind-Value="_showDueOnly" @bind-Value:after="ResetPagination" Label="🔥 Due Today Only" />
 
-            <TemplateColumn Title="Status" Context="review">
-                @if (review.IsSolved)
-                {
-                    <FluentIcon Value="@_checkIcon" Color="Color.Success" />
-                }
-                else
-                {
-                    <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
-                }
-            </TemplateColumn>
+                <div class="u-spacer"></div>
+            </div>
 
-            <PropertyColumn Property="@(r => r.ContestName)" Title="Contest" />
-            <PropertyColumn Property="@(r => r.CreatedAt)" Title="Created" Format="yyyy-MM-dd" Sortable="true" />
+            <div class="data-surface">
+                <FluentDataGrid Items="@FilteredReviews"
+                                ResizableColumns="true"
+                                Pagination="@_pagination"
+                                Class="grid">
+                    <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
+                    <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
 
-            <TemplateColumn Title="Actions" Context="review">
-                <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => OpenEditDialogAsync(review))" />
-                <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
-            </TemplateColumn>
-        </FluentDataGrid>
+                    <TemplateColumn Title="Difficulty" Context="review">
+                        <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">
+                            @review.Difficulty
+                        </FluentBadge>
+                    </TemplateColumn>
 
-        <FluentPaginator State="@_pagination" />
+                    <TemplateColumn Title="Next Review" Context="review" Sortable="true" SortBy="@_nextReviewSorter">
+                        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalGap="6">
+                            @if (review.IsDue)
+                            {
+                                <FluentIcon Value="@_dueIcon" Color="Color.Error" />
+                                <span class="due">@review.NextReviewDate.ToString("MM/dd")</span>
+                            }
+                            else
+                            {
+                                <span class="muted">@review.NextReviewDate.ToString("MM/dd")</span>
+                            }
+                        </FluentStack>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Status" Context="review">
+                        @if (review.IsSolved)
+                        {
+                            <FluentIcon Value="@_checkIcon" Color="Color.Success" />
+                        }
+                        else
+                        {
+                            <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
+                        }
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Actions" Context="review">
+                        <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => OpenEditDialogAsync(review))" />
+                        <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
+                    </TemplateColumn>
+                </FluentDataGrid>
+
+                <FluentPaginator State="@_pagination" />
+            </div>
+        </div>
     }
 }
 
 @code {
     private const string UserId = "haru";
+
     private List<ReviewModel>? _reviews;
     private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
+
     private string _searchTerm = string.Empty;
     private string _statusFilter = "All";
-    
+    private bool _showDueOnly;
+
     private readonly Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
-    private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle(); 
+    private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle();
     private readonly Icon _circleIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Circle();
     private readonly Icon _deleteIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Delete();
     private readonly Icon _editIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Edit();
-    
+    private readonly Icon _dueIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Warning();
+
+    private readonly GridSort<ReviewModel> _nextReviewSorter =
+        GridSort<ReviewModel>.ByAscending(r => r.NextReviewDate);
+
     private int TotalCount => _reviews?.Count ?? 0;
     private int SolvedCount => _reviews?.Count(r => r.IsSolved) ?? 0;
-    private string CompletionRate => TotalCount == 0 ? "0.0" : ((double)SolvedCount / TotalCount * 100).ToString("F1");
+    private int DueCount => _reviews?.Count(r => r.IsDue) ?? 0;
+
+    private string CompletionRate =>
+        TotalCount == 0 ? "0.0" : ((double)SolvedCount / TotalCount * 100).ToString("F1");
 
     private IQueryable<ReviewModel>? FilteredReviews
     {
         get
         {
-            if (_reviews == null) return null;
+            if (_reviews is null) return null;
 
             var query = _reviews.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(_searchTerm))
             {
-                query = query.Where(r => r.ProblemId.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                                         r.Title.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(r =>
+                    r.ProblemId.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    r.Title.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (_statusFilter == "Solved") query = query.Where(r => r.IsSolved);
-            else if (_statusFilter == "Unsolved") query = query.Where(r => !r.IsSolved);
+            query = _statusFilter switch
+            {
+                "Solved" => query.Where(r => r.IsSolved),
+                "Unsolved" => query.Where(r => !r.IsSolved),
+                _ => query
+            };
 
-            return query.AsQueryable();
+            if (_showDueOnly)
+            {
+                query = query.Where(r => r.IsDue);
+            }
+
+            return query
+                .OrderByDescending(r => r.IsDue)
+                .ThenBy(r => r.NextReviewDate)
+                .AsQueryable();
         }
     }
 
     protected override async Task OnInitializedAsync()
-    {
-        await LoadDataAsync();
-    }
+        => await LoadDataAsync();
 
     private async Task LoadDataAsync()
     {
@@ -178,55 +233,57 @@ else
             Difficulty = 0
         };
 
-        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewDialog>(initialData, new DialogParameters()
-        {
-            Title = "Register Review",
-            PreventDismissOnOverlayClick = true,
-            Width = "500px"
-        });
+        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewDialog>(
+            initialData,
+            new DialogParameters
+            {
+                Title = "Register Review",
+                PreventDismissOnOverlayClick = true,
+                Width = "500px"
+            });
 
         var result = await dialog.Result;
 
-        if (!result.Cancelled && result.Data is CreateReviewRequest request)
+        if (result.Cancelled || result.Data is not CreateReviewRequest request) return;
+
+        try
         {
-            try
-            {
-                await ReviewApi.CreateReviewAsync(UserId, request);
-                await LoadDataAsync();
-                ToastService.ShowSuccess("Review registered successfully!");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error creating review.");
-                ToastService.ShowError("Could not register the review.");
-            }
+            await ReviewApi.CreateReviewAsync(UserId, request);
+            await LoadDataAsync();
+            ToastService.ShowSuccess("Review registered successfully!");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error creating review.");
+            ToastService.ShowError("Could not register the review.");
         }
     }
 
     private async Task OpenEditDialogAsync(ReviewModel review)
     {
-        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewProgressDialog>(review, new DialogParameters()
-        {
-            Title = "Update Progress",
-            PreventDismissOnOverlayClick = true,
-            Width = "500px"
-        });
+        var dialog = await DialogService.ShowDialogAsync<AtCoderRevManager.Web.Components.Dialogs.ReviewProgressDialog>(
+            review,
+            new DialogParameters
+            {
+                Title = "Update Progress",
+                PreventDismissOnOverlayClick = true,
+                Width = "500px"
+            });
 
         var result = await dialog.Result;
-        
-        if (!result.Cancelled && result.Data is UpdateProgressRequest request)
+
+        if (result.Cancelled || result.Data is not UpdateProgressRequest request) return;
+
+        try
         {
-            try
-            {
-                await ReviewApi.UpdateProgressAsync(UserId, review.Id, request.IsSolved, request.Notes);
-                await LoadDataAsync();
-                ToastService.ShowSuccess("Progress updated successfully!");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error updating progress for ID: {Id}", review.Id);
-                ToastService.ShowError("Could not update progress.");
-            }
+            await ReviewApi.UpdateProgressAsync(UserId, review.Id, request.IsSolved, request.Notes);
+            await LoadDataAsync();
+            ToastService.ShowSuccess("Progress updated successfully!");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating progress for ID: {Id}", review.Id);
+            ToastService.ShowError("Could not update progress.");
         }
     }
 
@@ -236,30 +293,26 @@ else
             $"Delete review for {review.ProblemId}?",
             "Delete",
             "Cancel",
-            "Deletion Confirmation"
-        );
+            "Deletion Confirmation");
 
         var result = await dialog.Result;
-        if (!result.Cancelled)
+        if (result.Cancelled) return;
+
+        try
         {
-            try
-            {
-                await ReviewApi.DeleteReviewAsync(UserId, review.Id);
-                await LoadDataAsync();
-                ToastService.ShowInfo("Review deleted.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error deleting review ID: {Id}", review.Id);
-                ToastService.ShowError("Could not delete the review.");
-            }
+            await ReviewApi.DeleteReviewAsync(UserId, review.Id);
+            await LoadDataAsync();
+            ToastService.ShowInfo("Review deleted.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting review ID: {Id}", review.Id);
+            ToastService.ShowError("Could not delete the review.");
         }
     }
 
     private async Task ResetPagination()
-    {
-        await _pagination.SetCurrentPageIndexAsync(0);
-    }
+        => await _pagination.SetCurrentPageIndexAsync(0);
 
     private string GetDifficultyColor(int difficulty)
     {

@@ -1,0 +1,33 @@
+﻿:root {
+    --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-size-base: 18px;
+    --line-height-base: 1.7;
+    --bg-0: #050812;
+    --bg-1: #070b18;
+    --surface-0: rgba(255, 255, 255, 0.10);
+    --surface-1: rgba(255, 255, 255, 0.14);
+    --surface-2: rgba(255, 255, 255, 0.18);
+    --text-1: rgba(255, 255, 255, 0.98);
+    --text-2: rgba(255, 255, 255, 0.90);
+    --text-3: rgba(255, 255, 255, 0.76);
+    --border-1: rgba(255, 255, 255, 0.14);
+    --border-2: rgba(255, 255, 255, 0.24);
+    --accent: #35b8ff;
+    --accent-2: #b25bff;
+    --danger: #ff4d4f;
+    --success: #2bd576;
+    --warning: #ffcc66;
+    --r-sm: 12px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --shadow-1: 0 18px 46px rgba(0, 0, 0, 0.55);
+    --shadow-2: 0 10px 26px rgba(0, 0, 0, 0.45);
+    --glow-1: 0 0 24px rgba(53, 184, 255, 0.22);
+    --glow-2: 0 0 26px rgba(178, 91, 255, 0.18);
+    --s-1: 6px;
+    --s-2: 10px;
+    --s-3: 14px;
+    --s-4: 18px;
+    --s-5: 24px;
+    --s-6: 34px;
+}

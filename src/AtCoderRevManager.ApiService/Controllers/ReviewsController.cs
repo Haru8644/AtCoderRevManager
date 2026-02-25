@@ -80,8 +80,6 @@ public class ReviewsController : ControllerBase
     }
 }
 
-// --- DTO Definitions ---
-
 public record CreateReviewRequest(
     [Required] string ProblemId,
     [Required] string Title,
@@ -100,9 +98,11 @@ public record ReviewResponse(
     int Difficulty,
     bool IsSolved,
     string Notes,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    int ReviewCount,
+    DateTime NextReviewDate
 )
 {
     public static ReviewResponse FromEntity(Review r) =>
-        new(r.Id, r.UserId, r.ProblemId, r.Title, r.ContestName, r.Difficulty, r.IsSolved, r.Notes, r.CreatedAt);
+        new(r.Id, r.UserId, r.ProblemId, r.Title, r.ContestName, r.Difficulty, r.IsSolved, r.Notes, r.CreatedAt, r.ReviewCount, r.NextReviewDate);
 }

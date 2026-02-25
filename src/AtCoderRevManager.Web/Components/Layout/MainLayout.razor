@@ -1,24 +1,31 @@
 ﻿@inherits LayoutComponentBase
 
+<FluentDesignTheme Mode="DesignThemeModes.Dark" />
 <FluentDialogProvider />
 <FluentToastProvider />
 <FluentTooltipProvider />
 <FluentMessageBarProvider />
 
-<FluentLayout>
-    <FluentHeader>
-        <FluentLabel Typo="Typography.H4" Color="Color.Fill">AtCoderRevManager</FluentLabel>
-    </FluentHeader>
-
-    <FluentStack Class="main" Orientation="Orientation.Horizontal" Width="100%">
+<div class="app-shell">
+    <aside class="shell-sidebar">
         <NavMenu />
-        <FluentBodyContent Class="body-content">
-            <div class="content px-4">
-                @Body
+    </aside>
+
+    <section class="shell-main">
+        <header class="shell-topbar">
+            <div class="brand">AtCoderRevManager</div>
+
+            <div class="brand-badge" title="Service status">
+                <span class="brand-dot" aria-hidden="true"></span>
+                <span class="muted">Interactive Server</span>
             </div>
-        </FluentBodyContent>
-    </FluentStack>
-</FluentLayout>
+        </header>
+
+        <main class="shell-content">
+            @Body
+        </main>
+    </section>
+</div>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

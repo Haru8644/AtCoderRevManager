@@ -1,0 +1,89 @@
+﻿html,
+body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--text-1);
+    color-scheme: dark;
+    background: radial-gradient(1100px 560px at 55% 35%, rgba(53, 184, 255, 0.16), transparent 62%), radial-gradient(900px 520px at 35% 62%, rgba(178, 91, 255, 0.14), transparent 65%), linear-gradient(180deg, #040716, #070b18);
+    background-attachment: fixed;
+}
+
+::selection {
+    background: rgba(53, 184, 255, 0.32);
+}
+
+:root {
+    --neutral-foreground-rest: rgba(255, 255, 255, 0.98);
+    --neutral-foreground-hover: rgba(255, 255, 255, 0.98);
+    --neutral-foreground-active: rgba(255, 255, 255, 0.98);
+    --neutral-fill-rest: rgba(255, 255, 255, 0.08);
+    --neutral-fill-hover: rgba(255, 255, 255, 0.12);
+    --neutral-fill-active: rgba(255, 255, 255, 0.14);
+    --neutral-layer-1: rgba(0, 0, 0, 0.30);
+    --neutral-layer-2: rgba(0, 0, 0, 0.36);
+    --neutral-layer-3: rgba(0, 0, 0, 0.42);
+    --neutral-stroke-rest: rgba(255, 255, 255, 0.18);
+    --neutral-stroke-hover: rgba(255, 255, 255, 0.26);
+    --neutral-stroke-active: rgba(53, 184, 255, 0.55);
+    --accent-fill-rest: rgba(53, 184, 255, 0.90);
+    --accent-fill-hover: rgba(53, 184, 255, 0.96);
+    --accent-fill-active: rgba(53, 184, 255, 1.00);
+}
+
+[data-glow="accent"] {
+    box-shadow: var(--shadow-1), var(--glow-1);
+}
+
+[data-glow="accent2"] {
+    box-shadow: var(--shadow-1), var(--glow-2);
+}
+
+:root {
+    --neutral-foreground-rest: rgba(255, 255, 255, 0.98);
+    --neutral-foreground-hover: rgba(255, 255, 255, 0.98);
+    --neutral-foreground-active: rgba(255, 255, 255, 0.98);
+    --neutral-foreground-hint: rgba(255, 255, 255, 0.78);
+    --neutral-fill-rest: rgba(255, 255, 255, 0.08);
+    --neutral-fill-hover: rgba(255, 255, 255, 0.12);
+    --neutral-fill-active: rgba(255, 255, 255, 0.14);
+    --neutral-layer-1: rgba(0, 0, 0, 0.32);
+    --neutral-layer-2: rgba(0, 0, 0, 0.38);
+    --neutral-layer-3: rgba(0, 0, 0, 0.44);
+    --neutral-stroke-rest: rgba(255, 255, 255, 0.18);
+    --neutral-stroke-hover: rgba(255, 255, 255, 0.26);
+    --neutral-stroke-active: rgba(53, 184, 255, 0.55);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    width: 200%;
+    height: 200%;
+    background-image: linear-gradient(rgba(53, 184, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 184, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    transform: perspective(520px) rotateX(60deg) translateY(-90px) translateZ(-200px);
+    animation: gridMove 22s linear infinite;
+    z-index: -2;
+    pointer-events: none;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(900px 520px at 55% 45%, rgba(53, 184, 255, 0.12), transparent 65%), radial-gradient(900px 520px at 35% 65%, rgba(178, 91, 255, 0.10), transparent 68%), radial-gradient(1200px 800px at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes gridMove {
+    0% {
+        transform: perspective(520px) rotateX(60deg) translateY(0) translateZ(-200px);
+    }
+
+    100% {
+        transform: perspective(520px) rotateX(60deg) translateY(44px) translateZ(-200px);
+    }
+}

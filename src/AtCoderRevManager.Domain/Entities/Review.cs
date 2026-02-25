@@ -14,26 +14,50 @@ public class Review
     public string Notes { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    public int ReviewCount { get; private set; }
+    public DateTime NextReviewDate { get; private set; }
+
     public Review(string userId, string problemId, string title, string contestName, int difficulty)
     {
-        if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException(nameof(userId));
-        if (string.IsNullOrWhiteSpace(problemId)) throw new ArgumentNullException(nameof(problemId));
-        if (string.IsNullOrWhiteSpace(title)) throw new ArgumentNullException(nameof(title));
-        if (string.IsNullOrWhiteSpace(contestName)) throw new ArgumentNullException(nameof(contestName));
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(problemId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
         UserId = userId;
         ProblemId = problemId;
         Title = title;
-        ContestName = contestName;
+        ContestName = contestName ?? string.Empty;
         Difficulty = difficulty;
         IsSolved = false;
         Notes = string.Empty;
         CreatedAt = DateTime.UtcNow;
+
+        ReviewCount = 0;
+        NextReviewDate = DateTime.UtcNow.AddDays(1);
     }
 
     public void UpdateProgress(bool isSolved, string notes)
     {
         IsSolved = isSolved;
         Notes = notes ?? string.Empty;
+
+        if (isSolved)
+        {
+            ReviewCount++;
+            int daysToAdd = ReviewCount switch
+            {
+                1 => 1,
+                2 => 3,
+                3 => 7,
+                4 => 21,
+                _ => 30
+            };
+            NextReviewDate = DateTime.UtcNow.AddDays(daysToAdd);
+        }
+        else
+        {
+            ReviewCount = 0;
+            NextReviewDate = DateTime.UtcNow.AddDays(1);
+        }
     }
 }
