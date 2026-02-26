@@ -1,5 +1,4 @@
-﻿/* App shell (layout). Keep component CSS small; shell is global. */
-.app-shell {
+﻿.app-shell {
     min-height: 100dvh;
     display: grid;
     grid-template-columns: 270px 1fr;
@@ -9,6 +8,12 @@
     .app-shell {
         grid-template-columns: 1fr;
     }
+}
+
+.shell-main {
+    display: grid;
+    grid-template-rows: 58px 1fr;
+    min-width: 0;
 }
 
 .shell-topbar {
@@ -32,32 +37,13 @@
     }
 }
 
-.shell-main {
-    display: grid;
-    grid-template-rows: 56px 1fr;
-    min-width: 0;
-}
-
-.shell-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: var(--s-3);
-    padding: 0 var(--s-5);
-    border-bottom: 1px solid var(--border-1);
-    background: linear-gradient(90deg, rgba(53, 184, 255, 0.22), rgba(178, 91, 255, 0.18));
-    backdrop-filter: blur(10px);
-}
-
 .shell-content {
     padding: var(--s-6);
     min-width: 0;
 }
 
 .shell-content > * {
-    max-width: 1180px;
+    max-width: 1440px;
 }
 
 @media (max-width: 900px) {
@@ -67,9 +53,8 @@
 }
 
 .brand {
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-weight: 750;
+    letter-spacing: 0.01em;
 }
 
 .brand-badge {

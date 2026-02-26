@@ -1,14 +1,36 @@
 ﻿@using Microsoft.AspNetCore.Components.Routing
 
 <div class="nav">
-    <div class="nav__sectionTitle">Workspace</div>
+    <div class="nav__group">
+        <div class="nav__title">Workspace</div>
 
-    <nav class="nav__links" aria-label="Primary">
-        <NavLink class="nav__link" href="/" Match="NavLinkMatch.All">
-            <span class="nav__icon" aria-hidden="true">⌂</span>
-            <span>Dashboard</span>
-        </NavLink>
-    </nav>
+        <nav class="nav__links" aria-label="Primary">
+            <NavLink class="nav__link" href="/" Match="NavLinkMatch.All">
+                <span class="nav__icon" aria-hidden="true">⌂</span>
+                <span class="nav__text">Dashboard</span>
+            </NavLink>
+        </nav>
+    </div>
+
+    <div class="nav__group">
+        <div class="nav__title">Quick Actions</div>
+
+        <div class="nav__actions">
+            <a class="nav__actionBtn" href="/?due=1">
+                <span class="nav__actionIcon" aria-hidden="true">✦</span>
+                <span>Review Now</span>
+            </a>
+
+            <a class="nav__actionBtn" href="/?create=1">
+                <span class="nav__actionIcon" aria-hidden="true">＋</span>
+                <span>New Review</span>
+            </a>
+        </div>
+
+        <div class="nav__hint">
+            Tips: keep tasks small and review daily.
+        </div>
+    </div>
 
     <div class="nav__footer">
         <div class="nav__user">

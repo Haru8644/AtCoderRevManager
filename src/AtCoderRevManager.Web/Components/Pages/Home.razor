@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.AspNetCore.Components
 @using AtCoderRevManager.Web.Models
 @using AtCoderRevManager.Web.Services
 @inject ReviewApiClient ReviewApi
@@ -36,113 +37,207 @@
 }
 else
 {
-    <div class="kpi-grid u-mb-5 fade-up">
-        <div class="kpi cyber-card sweep shimmer pop tap kpi--danger" data-glow="accent">
-            <div class="kpi__label">🔥 Due Today</div>
-            <div class="kpi__valueRow">
-                <div class="kpi__value">@DueCount</div>
-                <div class="muted">tasks</div>
-            </div>
-        </div>
+    <div class="dashboard-grid fade-up">
+        <section class="dashboard-main">
+            <div class="kpi-grid u-mb-5">
+                <div class="kpi cyber-card sweep shimmer pop tap kpi--danger" data-glow="accent">
+                    <div class="kpi__label">🔥 Due Today</div>
+                    <div class="kpi__valueRow">
+                        <div class="kpi__value">@DueCount</div>
+                        <div class="muted">tasks</div>
+                    </div>
+                </div>
 
-        <div class="kpi cyber-card sweep shimmer pop tap kpi--accent">
-            <div class="kpi__label">Total Reviews</div>
-            <div class="kpi__valueRow">
-                <div class="kpi__value">@TotalCount</div>
-            </div>
-        </div>
+                <div class="kpi cyber-card sweep shimmer pop tap kpi--accent">
+                    <div class="kpi__label">Total Reviews</div>
+                    <div class="kpi__valueRow">
+                        <div class="kpi__value">@TotalCount</div>
+                    </div>
+                </div>
 
-        <div class="kpi cyber-card sweep shimmer pop tap kpi--success">
-            <div class="kpi__label">Solved</div>
-            <div class="kpi__valueRow">
-                <div class="kpi__value">@SolvedCount</div>
-            </div>
-        </div>
+                <div class="kpi cyber-card sweep shimmer pop tap kpi--success">
+                    <div class="kpi__label">Solved</div>
+                    <div class="kpi__valueRow">
+                        <div class="kpi__value">@SolvedCount</div>
+                    </div>
+                </div>
 
-        <div class="kpi cyber-card sweep shimmer pop tap kpi--warning">
-            <div class="kpi__label">Completion Rate</div>
-            <div class="kpi__valueRow">
-                <div class="kpi__value">@CompletionRate</div>
-                <div class="muted">%</div>
+                <div class="kpi cyber-card sweep shimmer pop tap kpi--warning">
+                    <div class="kpi__label">Completion Rate</div>
+                    <div class="kpi__valueRow">
+                        <div class="kpi__value">@CompletionRate</div>
+                        <div class="muted">%</div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            @if (_reviews.Count == 0)
+            {
+                <FluentMessageBar Intent="MessageIntent.Info">
+                    No reviews found. Start your first review cycle by clicking “New Review”.
+                </FluentMessageBar>
+            }
+            else
+            {
+                <div class="glass panel u-mb-4 cyber-card sweep shimmer tap">
+                    <div class="u-row focus-ring">
+                        <FluentSearch class="u-w-320"
+                                      @bind-Value="_searchTerm"
+                                      @bind-Value:after="ResetPagination"
+                                      Placeholder="Search by ID or Title…" />
+
+                        <FluentSelect TOption="string" @bind-Value="_statusFilter" @bind-Value:after="ResetPagination">
+                            <FluentOption Value="All">All Status</FluentOption>
+                            <FluentOption Value="Solved">Solved</FluentOption>
+                            <FluentOption Value="Unsolved">Unsolved</FluentOption>
+                        </FluentSelect>
+
+                        <FluentSwitch @bind-Value="_showDueOnly" @bind-Value:after="ResetPagination" Label="🔥 Due Today Only" />
+
+                        <div class="u-spacer"></div>
+                    </div>
+
+                    <div class="data-surface">
+                        <FluentDataGrid Items="@FilteredReviews"
+                                        ResizableColumns="true"
+                                        Pagination="@_pagination"
+                                        Class="grid">
+                            <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
+                            <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
+
+                            <TemplateColumn Title="Difficulty" Context="review">
+                                <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">
+                                    @review.Difficulty
+                                </FluentBadge>
+                            </TemplateColumn>
+
+                            <TemplateColumn Title="Next Review" Context="review" Sortable="true" SortBy="@_nextReviewSorter">
+                                <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalGap="6">
+                                    @if (review.IsDue)
+                                    {
+                                        <FluentIcon Value="@_dueIcon" Color="Color.Error" />
+                                        <span class="due">@review.NextReviewDate.ToString("MM/dd")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">@review.NextReviewDate.ToString("MM/dd")</span>
+                                    }
+                                </FluentStack>
+                            </TemplateColumn>
+
+                            <TemplateColumn Title="Status" Context="review">
+                                @if (review.IsSolved)
+                                {
+                                    <FluentIcon Value="@_checkIcon" Color="Color.Success" />
+                                }
+                                else
+                                {
+                                    <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
+                                }
+                            </TemplateColumn>
+
+                            <TemplateColumn Title="Actions" Context="review">
+                                <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => OpenEditDialogAsync(review))" />
+                                <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
+                            </TemplateColumn>
+                        </FluentDataGrid>
+
+                        <FluentPaginator State="@_pagination" />
+                    </div>
+                </div>
+            }
+        </section>
+
+        <aside class="dashboard-side">
+            <div class="side-card cyber-card sweep shimmer tap">
+                <div class="side-card__title">Today</div>
+                <div class="side-metric">
+                    <div class="side-metric__value">@DueCount</div>
+                    <div class="side-metric__label">due items</div>
+                </div>
+
+                <div class="side-list">
+                    @foreach (var item in DuePreview)
+                    {
+                        <div class="side-item">
+                            <div class="side-item__main">
+                                <div class="side-item__id">@item.ProblemId</div>
+                                <div class="side-item__title">@item.Title</div>
+                            </div>
+                            <div class="side-item__meta">
+                                <span class="pill pill--danger">@item.NextReviewDate.ToString("MM/dd")</span>
+                            </div>
+                        </div>
+                    }
+
+                    @if (DuePreview.Count == 0)
+                    {
+                        <div class="muted">No due items. Great pace.</div>
+                    }
+                </div>
+
+                <div class="side-actions">
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@EnableDueOnlyAsync">
+                        Focus Due
+                    </FluentButton>
+                    <FluentButton Appearance="Appearance.Outline" OnClick="@OpenCreateDialogAsync">
+                        Add
+                    </FluentButton>
+                </div>
+            </div>
+
+            <div class="side-card cyber-card sweep shimmer tap">
+                <div class="side-card__title">Next Up</div>
+
+                @if (NextUp is not null)
+                {
+                    <div class="side-next">
+                        <div class="side-next__date">@NextUp.Value.Date.ToString("yyyy/MM/dd")</div>
+                        <div class="side-next__hint muted">next scheduled review</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="muted">No upcoming items.</div>
+                }
+
+                <div class="side-miniGrid">
+                    <div class="miniStat">
+                        <div class="miniStat__value">@TotalCount</div>
+                        <div class="miniStat__label">total</div>
+                    </div>
+                    <div class="miniStat">
+                        <div class="miniStat__value">@SolvedCount</div>
+                        <div class="miniStat__label">solved</div>
+                    </div>
+                    <div class="miniStat">
+                        <div class="miniStat__value">@CompletionRate%</div>
+                        <div class="miniStat__label">rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-card cyber-card sweep shimmer tap">
+                <div class="side-card__title">Insights</div>
+                <div class="muted">Keep sessions short. Consistency beats intensity.</div>
+
+                <div class="side-miniGrid">
+                    <div class="miniStat">
+                        <div class="miniStat__value">—</div>
+                        <div class="miniStat__label">streak</div>
+                    </div>
+                    <div class="miniStat">
+                        <div class="miniStat__value">@DueCount</div>
+                        <div class="miniStat__label">due</div>
+                    </div>
+                    <div class="miniStat">
+                        <div class="miniStat__value">@(_showDueOnly ? "ON" : "OFF")</div>
+                        <div class="miniStat__label">focus</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
-
-    @if (_reviews.Count == 0)
-    {
-        <FluentMessageBar Intent="MessageIntent.Info">
-            No reviews found. Start your first review cycle by clicking “New Review”.
-        </FluentMessageBar>
-    }
-    else
-    {
-        <div class="glass panel u-mb-4 cyber-card sweep shimmer tap fade-up">
-            <div class="u-row focus-ring">
-                <FluentSearch class="u-w-320"
-                              @bind-Value="_searchTerm"
-                              @bind-Value:after="ResetPagination"
-                              Placeholder="Search by ID or Title…" />
-
-                <FluentSelect TOption="string" @bind-Value="_statusFilter" @bind-Value:after="ResetPagination">
-                    <FluentOption Value="All">All Status</FluentOption>
-                    <FluentOption Value="Solved">Solved</FluentOption>
-                    <FluentOption Value="Unsolved">Unsolved</FluentOption>
-                </FluentSelect>
-
-                <FluentSwitch @bind-Value="_showDueOnly" @bind-Value:after="ResetPagination" Label="🔥 Due Today Only" />
-
-                <div class="u-spacer"></div>
-            </div>
-
-            <div class="data-surface">
-                <FluentDataGrid Items="@FilteredReviews"
-                                ResizableColumns="true"
-                                Pagination="@_pagination"
-                                Class="grid">
-                    <PropertyColumn Property="@(r => r.ProblemId)" Sortable="true" Title="Problem" />
-                    <PropertyColumn Property="@(r => r.Title)" Sortable="true" />
-
-                    <TemplateColumn Title="Difficulty" Context="review">
-                        <FluentBadge BackgroundColor="@GetDifficultyColor(review.Difficulty)" Color="white">
-                            @review.Difficulty
-                        </FluentBadge>
-                    </TemplateColumn>
-
-                    <TemplateColumn Title="Next Review" Context="review" Sortable="true" SortBy="@_nextReviewSorter">
-                        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalGap="6">
-                            @if (review.IsDue)
-                            {
-                                <FluentIcon Value="@_dueIcon" Color="Color.Error" />
-                                <span class="due">@review.NextReviewDate.ToString("MM/dd")</span>
-                            }
-                            else
-                            {
-                                <span class="muted">@review.NextReviewDate.ToString("MM/dd")</span>
-                            }
-                        </FluentStack>
-                    </TemplateColumn>
-
-                    <TemplateColumn Title="Status" Context="review">
-                        @if (review.IsSolved)
-                        {
-                            <FluentIcon Value="@_checkIcon" Color="Color.Success" />
-                        }
-                        else
-                        {
-                            <FluentIcon Value="@_circleIcon" Color="Color.Warning" />
-                        }
-                    </TemplateColumn>
-
-                    <TemplateColumn Title="Actions" Context="review">
-                        <FluentButton IconStart="@_editIcon" Appearance="Appearance.Lightweight" OnClick="@(() => OpenEditDialogAsync(review))" />
-                        <FluentButton IconStart="@_deleteIcon" Appearance="Appearance.Lightweight" OnClick="@(() => DeleteReviewAsync(review))" />
-                    </TemplateColumn>
-                </FluentDataGrid>
-
-                <FluentPaginator State="@_pagination" />
-            </div>
-        </div>
-    }
 }
 
 @code {
@@ -154,6 +249,15 @@ else
     private string _searchTerm = string.Empty;
     private string _statusFilter = "All";
     private bool _showDueOnly;
+
+    [SupplyParameterFromQuery(Name = "due")]
+    public bool DueQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "create")]
+    public bool CreateQuery { get; set; }
+
+    private bool _pendingAutoCreate;
+    private bool _autoCreateTriggered;
 
     private readonly Icon _addIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Add();
     private readonly Icon _checkIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CheckmarkCircle();
@@ -171,6 +275,24 @@ else
 
     private string CompletionRate =>
         TotalCount == 0 ? "0.0" : ((double)SolvedCount / TotalCount * 100).ToString("F1");
+
+    private List<ReviewModel> DuePreview =>
+        _reviews is null
+            ? []
+            : _reviews
+                .Where(r => r.IsDue)
+                .OrderBy(r => r.NextReviewDate)
+                .Take(5)
+                .ToList();
+
+    private DateTime? NextUp =>
+        _reviews is null
+            ? null
+            : _reviews
+                .Where(r => !r.IsDue)
+                .OrderBy(r => r.NextReviewDate)
+                .Select(r => (DateTime?)r.NextReviewDate.Date)
+                .FirstOrDefault();
 
     private IQueryable<ReviewModel>? FilteredReviews
     {
@@ -209,6 +331,31 @@ else
     protected override async Task OnInitializedAsync()
         => await LoadDataAsync();
 
+    protected override Task OnParametersSetAsync()
+    {
+        if (DueQuery)
+        {
+            _showDueOnly = true;
+        }
+
+        if (CreateQuery)
+        {
+            _pendingAutoCreate = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingAutoCreate && !_autoCreateTriggered && _reviews is not null)
+        {
+            _autoCreateTriggered = true;
+            _pendingAutoCreate = false;
+            await OpenCreateDialogAsync();
+        }
+    }
+
     private async Task LoadDataAsync()
     {
         try
@@ -221,6 +368,13 @@ else
             ToastService.ShowError("Failed to fetch data from the server.");
             _reviews = [];
         }
+    }
+
+    private async Task EnableDueOnlyAsync()
+    {
+        _showDueOnly = true;
+        await ResetPagination();
+        StateHasChanged();
     }
 
     private async Task OpenCreateDialogAsync()

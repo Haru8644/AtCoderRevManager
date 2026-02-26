@@ -2,6 +2,131 @@
     height: 42vh;
 }
 
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--s-5);
+    align-items: start;
+}
+
+@media (max-width: 1150px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+}
+
+.side-card {
+    padding: var(--s-5);
+}
+
+.side-card__title {
+    font-weight: 850;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+}
+
+.side-metric {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.side-metric__value {
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.side-metric__label {
+    color: var(--text-3);
+}
+
+.side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0 14px;
+}
+
+.side-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.side-item__id {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--text-2);
+}
+
+.side-item__title {
+    color: var(--text-3);
+    font-size: 0.92rem;
+    margin-top: 2px;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.pill--danger {
+    background: rgba(255, 77, 79, 0.14);
+    border-color: rgba(255, 77, 79, 0.22);
+}
+
+.side-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.side-next__date {
+    font-size: 1.35rem;
+    font-weight: 900;
+}
+
+.side-miniGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.miniStat {
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.14);
+}
+
+.miniStat__value {
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.miniStat__label {
+    color: var(--text-3);
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
 :deep(fluent-data-grid),
 :deep(fluent-data-grid-row),
 :deep(fluent-data-grid-cell) {
