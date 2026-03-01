@@ -1,4 +1,4 @@
-# 🧠 AtCoderRevManager
+# ⏱️🔁 AtCoderRevManager
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![C#](https://img.shields.io/badge/C%23-12-239120?style=for-the-badge&logo=csharp&logoColor=white)
@@ -72,15 +72,16 @@ This repository follows Clean Architecture boundaries and keeps UI concerns out 
 
 ## 🧩 Data & Infrastructure Notes
 - **Local development:** SQL Server is provisioned via **.NET Aspire** (Docker container) to keep setup friction low.
-- **Azure SQL:** an Azure SQL database can be used as a target environment; however, it is intentionally not kept running continuously in this public setup to avoid unnecessary cost. The application design remains provider-compatible for deployment scenarios.
+- **Azure SQL:** An Azure SQL database can be used as a target environment; however, it is intentionally not kept running continuously in this public setup to avoid unnecessary cost. The application design remains provider-compatible for deployment scenarios.
 
 ---
 
 ## 🛠️ Getting Started (Local Development)
 
 ### Prerequisites
-- .NET SDK (matching the solution’s `TargetFramework`)
-- Docker Desktop (required for Aspire-managed SQL Server)
+- .NET SDK 10.x
+- Docker Desktop (Linux containers / WSL2)
+  - Make sure Docker Desktop is running before executing `dotnet run`.
 - Visual Studio 2026 / Visual Studio 2022+ / VS Code
 
 ### Run the solution with .NET Aspire
@@ -89,3 +90,21 @@ From the repository root:
 ```bash
 cd src/AtCoderRevManager.AppHost
 dotnet run
+```
+### What happens next (Aspire Dashboard)
+Running the AppHost starts a local **.NET Aspire Dashboard** (a management UI for the distributed app).
+
+In the terminal, you will see a URL like:
+- `Now listening on: https://localhost:17077`
+- `Login to the dashboard at https://localhost:17077/login?t=<one-time-token>`
+
+> The `t=<one-time-token>` is a temporary login token for the **Aspire Dashboard** (not the AtCoderRevManager app itself).
+
+### Open the actual app (Web UI)
+1. Open the Aspire Dashboard login URL shown in the console.
+2. In the dashboard, find `AtCoderRevManager.Web`.
+3. Click its **Endpoint / Launch** link to open the AtCoderRevManager Web UI.
+
+### Troubleshooting
+- If `docker ps` fails, start Docker Desktop first.
+- If you see `Failed to fetch data from the server`, check that `AtCoderRevManager.ApiService` is running in the Aspire Dashboard.
